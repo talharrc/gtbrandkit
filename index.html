@@ -1,0 +1,498 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GalaxaTech — Visual System</title>
+<link rel="preconnect" href="https://api.fontshare.com"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f%5B%5D=satoshi@300,400,500,700,900&amp;f%5B%5D=clash-display@600,700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+ --void:#050509;--carbon:#0A0A12;--slate:#11111C;--deep:#1A1730;
+ --violet:#8B2CFF;--plasma:#A855F7;--lav:#C77DFF;--eblue:#5B8DEF;
+ --star:#F4F2FB;--ash:#B8B4CC;--mut:#6E6A85;--hair:rgba(199,125,255,.14);
+ --f:'Satoshi','Space Grotesk',system-ui,sans-serif;
+ --fm:'JetBrains Mono',monospace;--fs:'Clash Display',var(--f);
+ --glass:rgba(255,255,255,.045);
+ --glow:0 0 40px rgba(139,44,255,.4);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--void);color:var(--ash);line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;position:relative}
+/* global grain + ambient violet light */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.05;mix-blend-mode:overlay;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.vlight{position:fixed;inset:0;pointer-events:none;z-index:0;
+ background:radial-gradient(60% 50% at 82% 0%,rgba(139,44,255,.18),transparent 60%),radial-gradient(50% 40% at 0% 100%,rgba(91,141,239,.10),transparent 60%)}
+.mono{font-family:var(--fm);letter-spacing:.04em}
+.dim{color:var(--mut)}.bn{font-family:'Noto Sans Bengali',var(--f)}
+em{color:var(--lav);font-style:normal}
+b{color:var(--star)}
+/* layout */
+main{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 clamp(20px,5vw,40px) 80px;margin-left:max(248px,calc((100% - 1180px)/2 + 248px))}
+@media(max-width:1080px){main{margin-left:auto;padding-top:64px}}
+nav.side{position:fixed;left:0;top:0;height:100vh;width:248px;padding:32px 24px;z-index:30;
+ border-right:1px solid var(--hair);background:rgba(5,5,9,.6);backdrop-filter:blur(18px);display:flex;flex-direction:column;gap:5px}
+nav.side .brandmini{margin-bottom:26px}
+nav.side .brandmini svg{height:30px}
+nav.side a.lk{display:flex;gap:11px;align-items:baseline;font-size:.86rem;color:var(--ash);padding:9px 12px;border-radius:11px;transition:.2s;border:1px solid transparent;text-decoration:none}
+nav.side a.lk .n{font-family:var(--fm);font-size:.66rem;color:var(--mut);width:20px}
+nav.side a.lk:hover{background:rgba(255,255,255,.04);color:#fff}
+nav.side a.lk.active{background:rgba(139,44,255,.12);color:#fff;border-color:var(--hair);box-shadow:inset 0 0 20px rgba(139,44,255,.1)}
+nav.side a.lk.active .n{color:var(--plasma)}
+.navft{margin-top:auto;font-size:.66rem;color:var(--mut);line-height:1.6}
+@media(max-width:1080px){nav.side{position:fixed;top:0;left:0;right:0;height:auto;width:100%;flex-direction:row;overflow-x:auto;gap:3px;padding:10px 14px;border-right:none;border-bottom:1px solid var(--hair)}nav.side .brandmini,.navft{display:none}nav.side a.lk{white-space:nowrap;padding:7px 11px}nav.side a.lk .n{display:none}}
+/* glass utility */
+.glass{background:var(--glass);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);
+ border:1px solid rgba(199,125,255,.20);border-radius:20px;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.10),inset 0 0 30px rgba(139,44,255,.06),0 24px 70px rgba(0,0,0,.55)}
+.glass-strong{background:rgba(255,255,255,.06);backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);
+ border:1px solid rgba(199,125,255,.28);border-radius:26px;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 50px rgba(139,44,255,.08),0 40px 90px rgba(0,0,0,.6)}
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:90px 0 60px;overflow:hidden}
+.grid-floor{position:absolute;left:-20%;right:-20%;bottom:-5%;height:60%;z-index:0;
+ background-image:linear-gradient(rgba(139,44,255,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(139,44,255,.22) 1px,transparent 1px);
+ background-size:50px 50px;transform:perspective(420px) rotateX(62deg);transform-origin:bottom;
+ mask-image:linear-gradient(to top,#000 10%,transparent 75%);-webkit-mask-image:linear-gradient(to top,#000 10%,transparent 75%)}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);z-index:0;pointer-events:none}
+.orb-a{width:520px;height:520px;background:radial-gradient(circle,rgba(139,44,255,.5),transparent 70%);top:-120px;right:-80px;animation:float 12s ease-in-out infinite}
+.orb-b{width:420px;height:420px;background:radial-gradient(circle,rgba(91,141,239,.32),transparent 70%);bottom:-60px;left:-120px;animation:float 15s ease-in-out infinite reverse}
+.orb-c{width:560px;height:560px;background:radial-gradient(circle,rgba(168,85,247,.34),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);filter:blur(90px)}
+.hud{position:absolute;font-size:.64rem;color:var(--mut);z-index:3}
+.hud-tl{top:24px;left:4px}.hud-tr{top:24px;right:4px}.hud-bl{bottom:30px;left:4px}.hud-br{bottom:30px;right:4px}
+.hero-inner{position:relative;z-index:4;max-width:900px}
+.kik{font-size:.72rem;letter-spacing:.34em;color:var(--plasma);margin-bottom:22px}
+.hero h1{font-family:var(--f);line-height:.84;margin-bottom:26px;display:flex;flex-direction:column}
+.scriptline{font-family:var(--fs);font-style:italic;font-weight:600;font-size:clamp(1.3rem,3vw,2.1rem);color:var(--lav);margin-bottom:6px;margin-left:6px}
+.mega{font-weight:900;font-size:clamp(3.4rem,13vw,9.5rem);letter-spacing:-.04em;color:var(--star);
+ text-shadow:0 0 60px rgba(139,44,255,.4)}
+.mega.grad2{background:linear-gradient(100deg,#A855F7,#5B8DEF 60%,#C77DFF);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.lede{font-size:clamp(1rem,1.6vw,1.18rem);color:var(--ash);max-width:60ch;margin-bottom:38px}
+.herorow{display:flex;gap:40px;align-items:center;flex-wrap:wrap}
+.heroicon svg{width:150px;height:150px;border-radius:34px;filter:drop-shadow(0 24px 50px rgba(139,44,255,.55));animation:float 7s ease-in-out infinite}
+.herometa{display:flex;flex-direction:column;gap:12px}
+.mrow{display:flex;gap:16px;align-items:baseline;font-size:.92rem;border-bottom:1px solid var(--hair);padding-bottom:10px}
+.mrow .mono{font-size:.64rem;width:70px;flex:0 0 70px}
+.scrollcue{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:.62rem;color:var(--mut);z-index:4;animation:float 3s ease-in-out infinite}
+/* SECTION base */
+.sec{position:relative;padding:96px 0;border-top:1px solid var(--hair)}
+.sechead{max-width:62ch;margin-bottom:42px}
+.eyebrow{display:inline-flex;align-items:center;gap:12px;font-family:var(--fm);font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--plasma);margin-bottom:16px}
+.eyebrow i{width:26px;height:1px;background:var(--violet);box-shadow:0 0 8px var(--violet)}
+.sec h2{font-family:var(--f);font-weight:900;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.02;letter-spacing:-.02em;color:var(--star);margin-bottom:14px}
+.sub{font-size:1.05rem;color:var(--ash)}
+.subh{font-family:var(--f);font-weight:700;font-size:1.05rem;color:var(--star);margin:34px 0 16px;letter-spacing:.01em}
+.note{padding:16px 20px;border-radius:16px;font-size:.92rem;color:var(--ash);margin-top:26px;border-left:2px solid var(--violet)}
+/* OVERVIEW layers */
+.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.layer{padding:24px;position:relative;transition:.4s cubic-bezier(.2,.7,.2,1)}
+.layer:hover{transform:translateY(-6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 30px 60px rgba(0,0,0,.6),0 0 40px rgba(139,44,255,.28)}
+.layer .ln{font-size:.8rem;color:var(--plasma);display:block;margin-bottom:12px}
+.layer h4{font-family:var(--f);font-weight:700;color:var(--star);font-size:1.02rem;margin-bottom:8px}
+.layer p{font-size:.88rem;color:var(--ash)}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.vscard{padding:24px;border-radius:18px}
+.vscard.bad{background:rgba(255,255,255,.02);border:1px dashed rgba(255,120,150,.3)}
+.vscard.good{background:rgba(139,44,255,.07);border:1px solid var(--hair);box-shadow:inset 0 0 40px rgba(139,44,255,.08)}
+.vscard .tag{display:block;font-size:.66rem;margin-bottom:10px}
+.vscard.bad .tag{color:#ff8098}.vscard.good .tag{color:var(--lav)}
+.vscard p{font-size:.92rem}
+@media(max-width:680px){.vs{grid-template-columns:1fr}}
+/* LOGO */
+.logo-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.logo-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px;position:relative;min-height:200px}
+.logo-stage.big{min-height:420px;background:radial-gradient(circle at 70% 25%,rgba(139,44,255,.18),transparent 60%),var(--glass)}
+.logo-stage.darker{background:rgba(255,255,255,.02)}
+.logocol{display:grid;gap:18px}
+.logo-stage .ic{width:200px;height:200px;border-radius:44px;filter:drop-shadow(0 20px 50px rgba(139,44,255,.5))}
+.logo-stage .ic.sm{width:96px;height:96px;border-radius:22px}
+.lockholder svg{height:34px}
+.cap{font-size:.62rem;color:var(--mut)}
+.usegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.usebox{display:flex;flex-direction:column;align-items:center;gap:10px}
+.usebox .mono{font-size:.6rem;color:var(--mut)}
+.glowwrap{width:100%;aspect-ratio:1.4;display:flex;align-items:center;justify-content:center;border-radius:16px;background:#050509;border:1px solid var(--hair);box-shadow:inset 0 0 40px rgba(139,44,255,.12)}
+.glowwrap.gradbg{background:radial-gradient(circle at 60% 30%,rgba(139,44,255,.5),#0A0A12 75%)}
+.glowwrap.light{background:rgba(255,255,255,.92);box-shadow:none}
+.glowwrap .mk{height:64px;width:auto;filter:drop-shadow(0 0 18px rgba(139,44,255,.5))}
+.glowwrap.light .mk{filter:none}
+@media(max-width:780px){.logo-grid{grid-template-columns:1fr}.usegrid{grid-template-columns:repeat(2,1fr)}}
+/* COLOR */
+.swrow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.sw{cursor:pointer;border-radius:16px;overflow:hidden;background:var(--glass);border:1px solid var(--hair);padding:0 0 14px;transition:.25s}
+.sw:hover{transform:translateY(-4px);border-color:rgba(199,125,255,.4)}
+.sw .chip{height:84px;border-radius:14px 14px 0 0}
+.sw b{display:block;color:var(--star);font-size:.9rem;padding:12px 14px 2px}
+.sw .mono{display:block;font-size:.72rem;color:var(--lav);padding:0 14px}
+.sw em{display:block;font-size:.68rem;color:var(--mut);padding:4px 14px 0}
+.glowsw .chip{margin:14px;height:64px;border-radius:14px}
+@media(max-width:780px){.swrow{grid-template-columns:repeat(2,1fr)}}
+/* code blocks */
+.codeblock{margin-top:20px;border-radius:14px;overflow:hidden;border:1px solid var(--hair);background:rgba(10,10,18,.7)}
+.codetop{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--hair);background:rgba(255,255,255,.02)}
+.codetop .mono{font-size:.68rem;color:var(--mut)}
+.copy{font-family:var(--fm);font-size:.64rem;color:var(--void);background:var(--lav);border:none;border-radius:20px;padding:5px 14px;cursor:pointer;font-weight:600;transition:.2s}
+.copy:hover{background:#fff;box-shadow:0 0 16px rgba(199,125,255,.6)}
+pre{padding:18px;font-family:var(--fm);font-size:.74rem;color:#D8CCF5;line-height:1.7;overflow-x:auto;white-space:pre}
+/* TYPOGRAPHY */
+.typestage{position:relative;padding:60px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden;background:radial-gradient(circle at 50% 0%,rgba(139,44,255,.16),transparent 60%),var(--glass)}
+.t-script{font-family:var(--fs);font-style:italic;font-weight:600;font-size:clamp(1.1rem,2.4vw,1.7rem);color:var(--ash);z-index:2}
+.t-mega{position:relative;font-family:var(--f);font-weight:900;font-size:clamp(3rem,11vw,7rem);letter-spacing:-.04em;line-height:.9;
+ background:linear-gradient(100deg,#fff,#C77DFF 50%,#8B2CFF);-webkit-background-clip:text;background-clip:text;color:transparent;z-index:2}
+.t-ghost{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%) scale(1.18);color:rgba(139,44,255,.12);-webkit-text-fill-color:rgba(139,44,255,.10);z-index:1;filter:blur(2px)}
+.t-sub{font-size:.74rem;letter-spacing:.3em;color:var(--lav);margin-top:14px;z-index:2}
+.typegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+.tcard{padding:22px}
+.tcard .role{font-size:.62rem;color:var(--mut);display:block;margin-bottom:14px}
+.tcard .samp{color:var(--star);line-height:1;margin-bottom:14px}
+.samp.big900{font-weight:900;font-size:3.4rem}.samp.script{font-family:var(--fs);font-style:italic;font-weight:600;font-size:3rem;color:var(--lav)}
+.samp.body{font-weight:400;font-size:3rem}.samp.meta{font-family:var(--fm);font-size:2rem;color:var(--plasma)}
+.tcard b{display:block;color:var(--star);font-size:.92rem;margin-bottom:6px}.tcard p{font-size:.8rem;color:var(--ash)}
+.scale-demo{margin-top:16px;padding:30px}
+.sd{color:var(--star);font-weight:900;border-bottom:1px solid var(--hair);padding:12px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.sd .dim{font-weight:400}
+@media(max-width:880px){.typegrid{grid-template-columns:repeat(2,1fr)}}
+/* GLASS demo */
+.glassdemo{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start;
+ padding:40px;border-radius:24px;background:radial-gradient(circle at 30% 20%,rgba(139,44,255,.3),transparent 55%),radial-gradient(circle at 80% 90%,rgba(91,141,239,.22),transparent 55%),#08060f;
+ position:relative;overflow:hidden}
+.gd-card{padding:32px;display:flex;flex-direction:column;gap:6px}
+.gd-logo{display:flex;justify-content:center;margin-bottom:8px}.gd-logo svg{height:28px}
+.gd-card h4{font-family:var(--f);font-weight:700;color:var(--star);font-size:1.3rem;text-align:center;margin-bottom:18px}
+.gd-card label{font-family:var(--fm);font-size:.6rem;color:var(--ash);letter-spacing:.1em;margin-top:8px}
+.g-input{height:42px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid rgba(199,125,255,.25);margin-top:4px;box-shadow:inset 0 0 18px rgba(139,44,255,.06)}
+.g-btn{margin-top:18px;height:50px;border-radius:14px;border:1px solid rgba(199,125,255,.5);color:#fff;font-family:var(--f);font-weight:700;font-size:1rem;cursor:pointer;
+ background:linear-gradient(180deg,rgba(168,85,247,.92),rgba(124,42,232,.86));box-shadow:0 0 24px rgba(139,44,255,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.g-btn:hover{box-shadow:0 0 40px rgba(139,44,255,.8),inset 0 1px 0 rgba(255,255,255,.5)}
+.g-foot{display:block;text-align:center;font-size:.7rem;color:var(--ash);margin-top:16px}
+.gd-side{display:flex;flex-direction:column;gap:14px}
+.g-pill{padding:14px 18px;border-radius:14px;color:var(--star);font-size:.9rem;text-align:center}
+.g-stat{padding:18px;display:flex;flex-direction:column;gap:4px}
+.g-stat .mono{font-size:.6rem;color:var(--mut)}.g-stat b{font-family:var(--f);font-weight:900;font-size:1.7rem;color:var(--star)}
+.glowtext{color:var(--lav)!important;text-shadow:0 0 20px rgba(199,125,255,.6)}
+.rules3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.rule{padding:20px}.rule b{color:var(--lav);font-size:.9rem;display:block;margin-bottom:6px}.rule p{font-size:.84rem}
+@media(max-width:780px){.glassdemo{grid-template-columns:1fr}.rules3{grid-template-columns:1fr}}
+/* TEXTURE */
+.texgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.texcard{border-radius:18px;overflow:hidden;border:1px solid var(--hair);background:var(--glass)}
+.texvis{height:190px;position:relative;overflow:hidden;background:#050509}
+.tx-grid::after{content:"";position:absolute;inset:-30%;background-image:linear-gradient(rgba(139,44,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(139,44,255,.3) 1px,transparent 1px);background-size:34px 34px;transform:perspective(300px) rotateX(58deg);transform-origin:bottom;mask-image:linear-gradient(to top,#000,transparent)}
+.tx-orb{background:radial-gradient(40% 50% at 72% 28%,rgba(139,44,255,.6),transparent 70%),radial-gradient(45% 45% at 22% 80%,rgba(91,141,239,.45),transparent 70%),#050509;filter:blur(4px)}
+.tx-stars{background-image:radial-gradient(rgba(255,255,255,.7) 1px,transparent 1px),radial-gradient(rgba(199,125,255,.5) 1px,transparent 1px);background-size:30px 30px,50px 50px;background-position:0 0,15px 15px;opacity:.6}
+.tx-grain{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");background-color:#0A0A12}
+.texmeta{display:flex;justify-content:space-between;align-items:center;padding:14px 16px}
+.texmeta b{color:var(--star);font-size:.92rem}
+@media(max-width:680px){.texgrid{grid-template-columns:1fr}}
+/* 3D IMAGERY */
+.imgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.imcard{padding:24px}
+.imcard .mono{font-size:.62rem;color:var(--plasma);display:block;margin-bottom:14px}
+.imcard ul{list-style:none}.imcard li{font-size:.86rem;color:var(--ash);padding:7px 0 7px 18px;position:relative;border-bottom:1px solid rgba(199,125,255,.08)}
+.imcard li::before{content:"";position:absolute;left:0;top:14px;width:5px;height:5px;border-radius:50%;background:var(--violet);box-shadow:0 0 8px var(--violet)}
+.framewrap{margin-top:16px}.frameex{padding:24px}.frameex .mono{font-size:.62rem;color:var(--plasma);display:block;margin-bottom:10px}.frameex p{font-size:.92rem}
+@media(max-width:880px){.imgrid{grid-template-columns:1fr}}
+/* MOTION */
+.motiongrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.mcard{padding:26px;display:flex;flex-direction:column;align-items:center;gap:10px;min-height:170px;justify-content:center;cursor:pointer}
+.mcard b{color:var(--star);font-size:.92rem}.mcard .mono{font-size:.6rem}
+.mcard .mmk{height:46px;color:#fff}
+.m-float .mmk{animation:float 8s ease-in-out infinite}
+.pulsedot{width:46px;height:46px;border-radius:50%;background:var(--violet);animation:glowPulse 2.4s ease-in-out infinite}
+.liftbox{width:54px;height:54px;border-radius:14px;background:linear-gradient(180deg,var(--plasma),var(--violet));transition:.4s cubic-bezier(.2,.7,.2,1);box-shadow:var(--glow)}
+.m-lift:hover .liftbox{transform:translateY(-10px) scale(1.05);box-shadow:0 20px 40px rgba(0,0,0,.6),0 0 50px rgba(139,44,255,.8)}
+.sweep{position:relative;width:100%;height:46px;border-radius:10px;background:#100c22;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.sweep span{font-family:var(--f);font-weight:900;color:var(--star);font-size:1.1rem;letter-spacing:.1em}
+.sweep::after{content:"";position:absolute;top:0;left:-60%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(199,125,255,.55),transparent);animation:sweep 2.6s ease-in-out infinite}
+.mcard.glass:hover{transform:translateY(-6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 30px 60px rgba(0,0,0,.6),0 0 40px rgba(139,44,255,.3)}
+@media(max-width:880px){.motiongrid{grid-template-columns:repeat(2,1fr)}}
+.endcard{position:relative;margin-top:40px;padding:70px 30px;border-radius:24px;text-align:center;overflow:hidden;border:1px solid var(--hair);background:#08060f}
+.endcard .mono.dim{position:relative;z-index:2;font-size:.66rem}
+.endcard h3{position:relative;z-index:2;font-family:var(--f);font-weight:900;font-size:clamp(1.4rem,3.4vw,2.4rem);color:var(--star);margin:14px 0;letter-spacing:-.02em}
+.endcard p{position:relative;z-index:2;font-size:.8rem}
+/* animations */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(139,44,255,.35)}50%{box-shadow:0 0 46px rgba(139,44,255,.75)}}
+@keyframes sweep{0%{left:-60%}60%,100%{left:120%}}
+.reveal{opacity:0;transform:translateY(20px);animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+.reveal.d1{animation-delay:.08s}.reveal.d2{animation-delay:.18s}.reveal.d3{animation-delay:.3s}
+@keyframes rise{to{opacity:1;transform:none}}
+/* toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);z-index:99;
+ background:var(--lav);color:var(--void);font-family:var(--fm);font-size:.74rem;font-weight:600;padding:11px 22px;border-radius:30px;box-shadow:0 0 30px rgba(199,125,255,.7);opacity:0;transition:.3s}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="neb" x1="0" y1="1" x2="1" y2="0">
+<stop offset="0" stop-color="#0A0825"/><stop offset=".38" stop-color="#1A133F"/>
+<stop offset=".70" stop-color="#2E1B6E"/><stop offset="1" stop-color="#7C2AE8"/></linearGradient>
+<radialGradient id="glw" cx=".80" cy=".15" r=".70"><stop offset="0" stop-color="#BF80FF" stop-opacity=".55"/><stop offset=".45" stop-color="#7C2AE8" stop-opacity=".10"/><stop offset="1" stop-color="#7C2AE8" stop-opacity="0"/></radialGradient>
+<radialGradient id="spark" cx=".82" cy=".12" r=".22"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"/><stop offset=".4" stop-color="#D0A0FF" stop-opacity=".10"/><stop offset="1" stop-color="#7C2AE8" stop-opacity="0"/></radialGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/><stop offset=".42" stop-color="#FFFFFF" stop-opacity=".07"/><stop offset=".50" stop-color="#E0C0FF" stop-opacity=".11"/><stop offset=".58" stop-color="#FFFFFF" stop-opacity=".07"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+<radialGradient id="vig" cx=".28" cy=".88" r=".95"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></radialGradient>
+<symbol id="gt-mark" viewBox="84.4 20.0 831.3 960.0"><path fill="currentColor" fill-rule="evenodd" d="M 223.63729246487873,61.3111962537251 C 215.3580246913581,62.49127288207757 197.28224776500642,68.97232865048973 191.17581949765864,72.96211153682427 C 164.6521924223074,90.23243933588768 151.67134951043002,107.85866326096222 142.7739463601533,138.67177522349942 L 140.97573435504472,144.8531289910601 L 140.39506172839506,458.1353767560665 L 139.79565772669224,771.3988931460196 L 135.8995317156237,773.4968071519795 C 133.7454235845041,774.6394210302255 130.48616432524486,777.4491272882078 128.63175819497664,779.7343550446999 L 125.27884206045127,783.855257556407 L 124.82928905917413,791.0668369518944 L 124.36100468284377,798.2784163473818 L 127.00212856534696,802.5491698595147 C 130.0178799489144,807.47552149851 132.88378033205618,810.0979140059599 137.26692209450835,811.9523201362281 L 140.35759897828865,813.2822477650066 L 140.35759897828865,874.8522775649212 C 140.35759897828865,908.7373350361856 140.6573009791401,937.2464878671776 141.03192848020436,938.2205193699447 L 141.72498935717329,940.0 L 505.73180076628347,940.0 L 869.7573435504471,940.0 L 869.7573435504471,661.2771392081736 L 869.7573435504471,382.5542784163474 L 713.6126011068541,382.5542784163474 L 557.467858663261,382.5542784163474 L 556.6998722860792,380.0255427841635 C 554.8267347807578,373.8254576415497 544.7679863771818,366.8948488718604 537.5376756066412,366.83865474670074 C 521.3724989357174,366.72626649638147 510.9953171562367,383.2848020434227 518.0570455512984,397.89527458492984 C 520.6981694338016,403.327373350362 525.1375053214134,406.51170710940835 532.7986377181778,408.44103873988934 L 538.0621541081312,409.75223499361437 L 543.7002979991486,407.8790974882929 C 548.7015751383567,406.23073648361003 556.156662409536,399.97445721583654 556.2128565346957,397.4082588335462 C 556.2128565346957,396.95870583226906 556.6624095359728,395.92848020434224 557.1868880374628,395.10429970200096 L 558.1421881651768,393.5870583226906 L 707.7684120902511,393.0063856960409 L 857.4133673903789,392.406981694338 L 858.8744146445297,393.62452107279694 L 860.3541932737337,394.8420604512559 L 822.6104725415071,432.52958705832276 L 784.8667518092807,470.2171136653896 L 671.373350361856,470.1796509152831 L 557.8799489144317,470.16091954022994 L 555.8756917837377,465.83397190293744 C 549.7505321413367,452.4972328650489 529.4644529587058,450.6990208599404 520.023839931886,462.6121753937846 L 516.3712217965092,467.2200936568753 L 515.9404001702853,474.24435930183057 L 515.4908471690081,481.26862494678585 L 518.0570455512984,485.8390804597701 C 522.9272030651341,494.492975734355 534.1660280970625,499.06343124733934 543.2320136228183,496.08514261387825 C 548.4767986377183,494.34312473392936 554.3771817794807,489.2294593444019 556.1941251596425,484.82758620689657 L 557.5989782886335,481.4559386973181 L 657.193699446573,481.21243082162624 C 754.3720732226479,480.9689229459345 770.8744146445297,481.100042571307 771.9233716475096,482.14899957428696 C 772.2043422733077,482.42997020008517 753.7539378458919,501.36739037888464 730.9203916560239,524.2009365687527 L 689.3929331630482,565.7471264367816 L 623.9455087271181,565.7471264367816 L 558.4793529161345,565.7471264367816 L 556.2877820349084,561.5325670498084 C 550.6309067688378,550.6683695189442 535.4397616006811,546.9782886334611 524.931460195828,553.9463601532568 C 512.4563644103873,562.2068965517242 512.7186036611324,581.4814814814818 525.3997445721584,588.9178373776076 L 530.3635589612602,591.8212005108558 L 537.2379736057896,591.8212005108558 L 544.1123882503193,591.8212005108558 L 548.7577692635164,588.5806726266496 C 551.3052362707535,586.8011919965943 554.3771817794807,583.5044699872287 555.5759897828864,581.2754363558963 L 557.7862920391656,577.2107279693487 L 561.7573435504471,576.5551298424862 C 563.9489144316731,576.180502341422 592.364410387399,575.8808003405704 624.9195402298851,575.8808003405707 L 684.0732226479352,575.8620689655172 L 684.7662835249043,577.6415495955725 C 685.1409110259685,578.6155810983396 685.4406130268201,620.5925925925926 685.4406130268198,670.9237973605789 L 685.4406130268198,762.4265644955301 L 505.9003831417624,762.1455938697318 L 326.36015325670496,761.8646232439337 L 326.0604512558536,726.9306087696891 L 325.76074925500217,691.996594295445 L 331.1179225202214,688.325244785015 C 334.05874840357603,686.320987654321 337.4865900383142,683.3239676458068 338.72286079182635,681.675606641124 L 340.97062579821204,678.697318007663 L 340.97062579821204,670.2681992337166 L 340.97062579821204,661.83908045977 L 337.6926351638996,657.5495955725842 C 335.894423158791,655.1894423158792 332.4665815240528,652.2673478075778 330.10642826734784,651.0685398041721 L 325.79821200510855,648.8582375478927 L 326.07918263090676,436.20093656875275 L 326.36015325670496,223.52490421455943 L 525.8492975734355,222.85057471264375 C 663.0191570881227,222.4010217113666 727.6236696466581,221.80161770966373 732.6436781609195,220.93997445721592 C 789.4746700723713,211.31204767986384 840.3865474670072,168.79182630906772 862.9578544061301,112.12941677309496 C 868.3150276713493,98.68028948488714 873.6534695615155,78.60025542784169 874.8522775649212,67.32396764580685 L 875.6389953171563,60.00000000000006 L 553.2345679012346,60.13111962537264 C 365.2277564921244,60.22477650063875 227.83312047679874,60.71179225202222 223.63729246487878,61.3111962537251 M 315.38356747552155,596.7662835249043 C 315.66453810131975,620.6675180928055 315.57088122605364,642.3771817794807 315.17752234993617,645.0183056619837 L 314.4469987228608,649.8135376756065 L 311.8620689655173,650.4691358024693 C 310.438484461473,650.8250319284803 307.21668795232017,653.3537675606642 304.7066836951895,656.0698169433801 L 300.1362281822052,661.0148999574287 L 299.38697318007667,667.1213282247766 L 298.6189868028949,673.2090251170712 L 300.4733929331631,677.6483610046828 C 302.68369518944235,682.9493401447423 306.9544487015752,687.6134525329928 311.18773946360153,689.3742017879949 L 314.29714772243506,690.6666666666667 L 314.9714772243508,694.7875691783738 C 315.34610472541505,697.0727969348659 315.66453810131975,715.7105151128139 315.66453810131975,736.2401021711366 L 315.68326947637297,773.5342699020862 L 378.676883780332,773.4593444018731 C 413.311196253725,773.4218816517669 441.83908045977,773.5717326521924 442.0638569604087,773.8152405278843 C 442.3073648361005,774.0400170285229 426.7228607918263,790.2801191996596 407.4670072371221,809.9106002554279 L 372.43933588761183,845.6126011068541 L 314.24095359727545,845.5938697318009 L 256.0425713069392,845.5938697318009 L 255.34951042997025,843.6270753512133 C 253.92592592592598,839.5436355896127 249.09323116219673,834.2613878246061 244.82247765006392,832.0698169433801 L 240.3831417624521,829.8220519369945 L 240.3831417624521,727.8484461472967 L 240.3831417624521,625.8935717326522 L 277.13409961685824,589.123882503193 C 297.3639846743295,568.8939974457218 314.10983397190296,552.5602383993189 314.37207322264794,552.822477650064 C 314.6343124733929,553.084716900809 315.0838654746701,572.8650489570032 315.38356747552155,596.7662835249043 M 229.1817794806301,732.1941251596425 C 229.20051085568332,783.7428693060876 229.20051085568332,826.806300553427 229.1817794806301,827.8552575564072 C 229.16304810557688,828.9229459344403 227.64580672626656,830.5713069391231 225.81013197105156,831.526607066837 C 221.12728820774805,833.9429544487018 217.99914857386125,837.4644529587058 215.37675606641128,843.2524478501491 L 213.1477224350788,848.2162622392507 L 213.78458918688807,853.6858237547892 C 214.57130693912308,860.2605363984674 217.66198382290338,864.9246487867179 223.91826309067693,868.9331630481056 L 228.58237547892722,871.9114516815666 L 234.91358024691363,871.855257556407 L 241.26351638995322,871.7990634312473 L 246.4333759046403,868.7645806726266 C 249.69263516389952,866.853980417199 252.44614729672202,864.1191996594296 253.83226905065987,861.4218816517666 C 255.03107705406558,859.0429970200084 256.6794380587484,856.8701575138357 257.4661558109834,856.5891868880376 C 258.27160493827165,856.3082162622393 281.2550021285654,855.9523201362281 308.5466155810984,855.8212005108555 L 358.1660280970626,855.5589612601107 L 358.9714772243508,856.8514261387825 C 359.4584929757343,857.6568752660708 346.27160493827165,871.667943805875 324.5244785014901,893.452532992763 L 289.27203065134097,928.7424435930184 L 220.43422733077912,928.7611749680714 L 151.59642401021716,928.7611749680714 L 151.59642401021716,870.9936143039592 L 151.59642401021716,813.2073222647934 L 156.76628352490422,810.1915708812262 L 161.93614303959134,807.1570881226053 L 164.7645806726267,800.994465730098 L 167.59301830566199,794.8131119625373 L 166.84376330353342,790.148999574287 C 165.7198808003406,783.1809280544912 161.20561941251594,776.2690506598551 156.03575989782888,773.6466581524053 L 151.59642401021716,771.3801617709664 L 151.59642401021716,743.002128565347 L 151.59642401021716,714.6428267347808 L 189.97701149425288,676.1498510004258 C 211.08727117922518,654.9646658152406 228.54491272882075,637.8254576415495 228.76968922945937,638.0502341421884 C 228.97573435504472,638.2562792677736 229.1817794806301,680.626649638144 229.1817794806301,732.1941251596425"/></symbol>
+<symbol id="gt-mark-grad" viewBox="84.4 20.0 831.3 960.0"><path fill="url(#neb)" fill-rule="evenodd" d="M 223.63729246487873,61.3111962537251 C 215.3580246913581,62.49127288207757 197.28224776500642,68.97232865048973 191.17581949765864,72.96211153682427 C 164.6521924223074,90.23243933588768 151.67134951043002,107.85866326096222 142.7739463601533,138.67177522349942 L 140.97573435504472,144.8531289910601 L 140.39506172839506,458.1353767560665 L 139.79565772669224,771.3988931460196 L 135.8995317156237,773.4968071519795 C 133.7454235845041,774.6394210302255 130.48616432524486,777.4491272882078 128.63175819497664,779.7343550446999 L 125.27884206045127,783.855257556407 L 124.82928905917413,791.0668369518944 L 124.36100468284377,798.2784163473818 L 127.00212856534696,802.5491698595147 C 130.0178799489144,807.47552149851 132.88378033205618,810.0979140059599 137.26692209450835,811.9523201362281 L 140.35759897828865,813.2822477650066 L 140.35759897828865,874.8522775649212 C 140.35759897828865,908.7373350361856 140.6573009791401,937.2464878671776 141.03192848020436,938.2205193699447 L 141.72498935717329,940.0 L 505.73180076628347,940.0 L 869.7573435504471,940.0 L 869.7573435504471,661.2771392081736 L 869.7573435504471,382.5542784163474 L 713.6126011068541,382.5542784163474 L 557.467858663261,382.5542784163474 L 556.6998722860792,380.0255427841635 C 554.8267347807578,373.8254576415497 544.7679863771818,366.8948488718604 537.5376756066412,366.83865474670074 C 521.3724989357174,366.72626649638147 510.9953171562367,383.2848020434227 518.0570455512984,397.89527458492984 C 520.6981694338016,403.327373350362 525.1375053214134,406.51170710940835 532.7986377181778,408.44103873988934 L 538.0621541081312,409.75223499361437 L 543.7002979991486,407.8790974882929 C 548.7015751383567,406.23073648361003 556.156662409536,399.97445721583654 556.2128565346957,397.4082588335462 C 556.2128565346957,396.95870583226906 556.6624095359728,395.92848020434224 557.1868880374628,395.10429970200096 L 558.1421881651768,393.5870583226906 L 707.7684120902511,393.0063856960409 L 857.4133673903789,392.406981694338 L 858.8744146445297,393.62452107279694 L 860.3541932737337,394.8420604512559 L 822.6104725415071,432.52958705832276 L 784.8667518092807,470.2171136653896 L 671.373350361856,470.1796509152831 L 557.8799489144317,470.16091954022994 L 555.8756917837377,465.83397190293744 C 549.7505321413367,452.4972328650489 529.4644529587058,450.6990208599404 520.023839931886,462.6121753937846 L 516.3712217965092,467.2200936568753 L 515.9404001702853,474.24435930183057 L 515.4908471690081,481.26862494678585 L 518.0570455512984,485.8390804597701 C 522.9272030651341,494.492975734355 534.1660280970625,499.06343124733934 543.2320136228183,496.08514261387825 C 548.4767986377183,494.34312473392936 554.3771817794807,489.2294593444019 556.1941251596425,484.82758620689657 L 557.5989782886335,481.4559386973181 L 657.193699446573,481.21243082162624 C 754.3720732226479,480.9689229459345 770.8744146445297,481.100042571307 771.9233716475096,482.14899957428696 C 772.2043422733077,482.42997020008517 753.7539378458919,501.36739037888464 730.9203916560239,524.2009365687527 L 689.3929331630482,565.7471264367816 L 623.9455087271181,565.7471264367816 L 558.4793529161345,565.7471264367816 L 556.2877820349084,561.5325670498084 C 550.6309067688378,550.6683695189442 535.4397616006811,546.9782886334611 524.931460195828,553.9463601532568 C 512.4563644103873,562.2068965517242 512.7186036611324,581.4814814814818 525.3997445721584,588.9178373776076 L 530.3635589612602,591.8212005108558 L 537.2379736057896,591.8212005108558 L 544.1123882503193,591.8212005108558 L 548.7577692635164,588.5806726266496 C 551.3052362707535,586.8011919965943 554.3771817794807,583.5044699872287 555.5759897828864,581.2754363558963 L 557.7862920391656,577.2107279693487 L 561.7573435504471,576.5551298424862 C 563.9489144316731,576.180502341422 592.364410387399,575.8808003405704 624.9195402298851,575.8808003405707 L 684.0732226479352,575.8620689655172 L 684.7662835249043,577.6415495955725 C 685.1409110259685,578.6155810983396 685.4406130268201,620.5925925925926 685.4406130268198,670.9237973605789 L 685.4406130268198,762.4265644955301 L 505.9003831417624,762.1455938697318 L 326.36015325670496,761.8646232439337 L 326.0604512558536,726.9306087696891 L 325.76074925500217,691.996594295445 L 331.1179225202214,688.325244785015 C 334.05874840357603,686.320987654321 337.4865900383142,683.3239676458068 338.72286079182635,681.675606641124 L 340.97062579821204,678.697318007663 L 340.97062579821204,670.2681992337166 L 340.97062579821204,661.83908045977 L 337.6926351638996,657.5495955725842 C 335.894423158791,655.1894423158792 332.4665815240528,652.2673478075778 330.10642826734784,651.0685398041721 L 325.79821200510855,648.8582375478927 L 326.07918263090676,436.20093656875275 L 326.36015325670496,223.52490421455943 L 525.8492975734355,222.85057471264375 C 663.0191570881227,222.4010217113666 727.6236696466581,221.80161770966373 732.6436781609195,220.93997445721592 C 789.4746700723713,211.31204767986384 840.3865474670072,168.79182630906772 862.9578544061301,112.12941677309496 C 868.3150276713493,98.68028948488714 873.6534695615155,78.60025542784169 874.8522775649212,67.32396764580685 L 875.6389953171563,60.00000000000006 L 553.2345679012346,60.13111962537264 C 365.2277564921244,60.22477650063875 227.83312047679874,60.71179225202222 223.63729246487878,61.3111962537251 M 315.38356747552155,596.7662835249043 C 315.66453810131975,620.6675180928055 315.57088122605364,642.3771817794807 315.17752234993617,645.0183056619837 L 314.4469987228608,649.8135376756065 L 311.8620689655173,650.4691358024693 C 310.438484461473,650.8250319284803 307.21668795232017,653.3537675606642 304.7066836951895,656.0698169433801 L 300.1362281822052,661.0148999574287 L 299.38697318007667,667.1213282247766 L 298.6189868028949,673.2090251170712 L 300.4733929331631,677.6483610046828 C 302.68369518944235,682.9493401447423 306.9544487015752,687.6134525329928 311.18773946360153,689.3742017879949 L 314.29714772243506,690.6666666666667 L 314.9714772243508,694.7875691783738 C 315.34610472541505,697.0727969348659 315.66453810131975,715.7105151128139 315.66453810131975,736.2401021711366 L 315.68326947637297,773.5342699020862 L 378.676883780332,773.4593444018731 C 413.311196253725,773.4218816517669 441.83908045977,773.5717326521924 442.0638569604087,773.8152405278843 C 442.3073648361005,774.0400170285229 426.7228607918263,790.2801191996596 407.4670072371221,809.9106002554279 L 372.43933588761183,845.6126011068541 L 314.24095359727545,845.5938697318009 L 256.0425713069392,845.5938697318009 L 255.34951042997025,843.6270753512133 C 253.92592592592598,839.5436355896127 249.09323116219673,834.2613878246061 244.82247765006392,832.0698169433801 L 240.3831417624521,829.8220519369945 L 240.3831417624521,727.8484461472967 L 240.3831417624521,625.8935717326522 L 277.13409961685824,589.123882503193 C 297.3639846743295,568.8939974457218 314.10983397190296,552.5602383993189 314.37207322264794,552.822477650064 C 314.6343124733929,553.084716900809 315.0838654746701,572.8650489570032 315.38356747552155,596.7662835249043 M 229.1817794806301,732.1941251596425 C 229.20051085568332,783.7428693060876 229.20051085568332,826.806300553427 229.1817794806301,827.8552575564072 C 229.16304810557688,828.9229459344403 227.64580672626656,830.5713069391231 225.81013197105156,831.526607066837 C 221.12728820774805,833.9429544487018 217.99914857386125,837.4644529587058 215.37675606641128,843.2524478501491 L 213.1477224350788,848.2162622392507 L 213.78458918688807,853.6858237547892 C 214.57130693912308,860.2605363984674 217.66198382290338,864.9246487867179 223.91826309067693,868.9331630481056 L 228.58237547892722,871.9114516815666 L 234.91358024691363,871.855257556407 L 241.26351638995322,871.7990634312473 L 246.4333759046403,868.7645806726266 C 249.69263516389952,866.853980417199 252.44614729672202,864.1191996594296 253.83226905065987,861.4218816517666 C 255.03107705406558,859.0429970200084 256.6794380587484,856.8701575138357 257.4661558109834,856.5891868880376 C 258.27160493827165,856.3082162622393 281.2550021285654,855.9523201362281 308.5466155810984,855.8212005108555 L 358.1660280970626,855.5589612601107 L 358.9714772243508,856.8514261387825 C 359.4584929757343,857.6568752660708 346.27160493827165,871.667943805875 324.5244785014901,893.452532992763 L 289.27203065134097,928.7424435930184 L 220.43422733077912,928.7611749680714 L 151.59642401021716,928.7611749680714 L 151.59642401021716,870.9936143039592 L 151.59642401021716,813.2073222647934 L 156.76628352490422,810.1915708812262 L 161.93614303959134,807.1570881226053 L 164.7645806726267,800.994465730098 L 167.59301830566199,794.8131119625373 L 166.84376330353342,790.148999574287 C 165.7198808003406,783.1809280544912 161.20561941251594,776.2690506598551 156.03575989782888,773.6466581524053 L 151.59642401021716,771.3801617709664 L 151.59642401021716,743.002128565347 L 151.59642401021716,714.6428267347808 L 189.97701149425288,676.1498510004258 C 211.08727117922518,654.9646658152406 228.54491272882075,637.8254576415495 228.76968922945937,638.0502341421884 C 228.97573435504472,638.2562792677736 229.1817794806301,680.626649638144 229.1817794806301,732.1941251596425"/></symbol>
+<symbol id="gt-icon" viewBox="0 0 1024 1024">
+ <rect width="1024" height="1024" rx="229" fill="url(#neb)"/>
+ <rect width="1024" height="1024" rx="229" fill="url(#glw)"/>
+ <rect width="1024" height="1024" rx="229" fill="url(#spark)"/>
+ <rect width="1024" height="1024" rx="229" fill="url(#sheen)"/>
+ <rect width="1024" height="1024" rx="229" fill="url(#vig)"/>
+ <g transform="scale(0.816587)"><path fill="#fff" fill-rule="evenodd" d="M 376.1000007522,248.1666646550001 C 368.7333340708,249.21666465710007 352.6500007053,254.98333133530014 347.2166673611,258.53333134240006 C 323.6166673139,273.89999803980004 312.0666672908,289.5833314045001 304.1500006083,316.99999812600004 L 302.55000060509997,322.49999813700003 L 302.03333393739996,601.2499986945 L 301.500000603,879.9833325853001 L 298.0333339294,881.8499992557 C 296.1166672589,882.8666659244 293.2166672531,885.3666659294 291.5666672498,887.3999992668 L 288.58333391049996,891.0666659408 L 288.18333390969997,897.4833326203 L 287.76666724219996,903.8999992998 L 290.11666724689996,907.6999993074 C 292.80000058559995,912.0833326495 295.35000059069995,914.4166659875 299.2500005985,916.0666659908 L 302.000000604,917.2499993265001 L 302.000000604,972.0333327694 C 302.000000604,1002.1833328297 302.2666672712,1027.5499995471 302.60000060519997,1028.4166662155 L 303.2166672731,1029.999999552 L 627.1000012541999,1029.999999552 L 951.0000019019999,1029.999999552 L 951.0000019019999,781.999999056 L 951.0000019019999,533.99999856 L 812.0666682908,533.99999856 L 673.1333346796,533.99999856 L 672.4500013449,531.7499985555 C 670.7833346749,526.2333318778001 661.833334657,520.0666651988 655.4000013108,520.0166651987 C 641.0166679487,519.9166651985 631.7833345969,534.6499985613 638.0666679428,547.6499985873 C 640.4166679475,552.4833319303001 644.3666679554,555.3166652693001 651.1833346356999,557.0333319394 L 655.8666679784,558.1999986084 L 660.8833346550999,556.5333319384 C 665.333334664,555.0666652688 671.9666680106,549.499998591 672.0166680107,547.2166652531 C 672.0166680107,546.8166652523 672.4166680115,545.8999985838 672.8833346791,545.1666652490001 L 673.7333346808,543.8166652463001 L 806.8666682804,543.2999985786 L 940.0166685467,542.7666652442 L 941.3166685493,543.8499985797 L 942.6333352186,544.9333319152 L 909.0500018181,578.4666653156 L 875.4666684176,611.999998716 L 774.4833348822999,611.9666653826 L 673.500001347,611.9499987159 L 671.7166680101,608.0999987082 C 666.2666679992,596.2333320178 648.2166679631,594.6333320146 639.8166679463,605.2333320358 L 636.5666679397999,609.333332044 L 636.1833346057,615.5833320565 L 635.7833346049,621.833332069 L 638.0666679428,625.8999987438 C 642.4000012847999,633.5999987591999 652.4000013048,637.666665434 660.4666679876,635.0166654287 C 665.1333346636,633.4666654256 670.3833346741,628.9166654165 672.000001344,624.999998742 L 673.2500013465,621.9999987360001 L 761.8666681904,621.7833320689 C 848.33333503,621.5666654018 863.0166683927,621.6833320687 863.9500017278999,622.6166654039 C 864.2000017283999,622.8666654044 847.7833350289,639.7166654381 827.4666683216,660.0333321454 L 790.5166682477,696.9999988860001 L 732.2833347979,696.9999988860001 L 674.0333346814,696.9999988860001 L 672.0833346774999,693.2499988785 C 667.0500013340999,683.5833321925 653.5333346404,680.2999988526001 644.1833346216999,686.4999988650001 C 633.0833345995,693.8499988797 633.3166679333,710.9999989140001 644.6000012892,717.6166655939 L 649.0166679647,720.1999989324 L 655.1333346435999,720.1999989324 L 661.2500013225,720.1999989324 L 665.3833346641,717.3166655933001 C 667.6500013353,715.7333322568 670.3833346741,712.7999989176001 671.4500013429,710.8166655803001 L 673.4166680134999,707.1999989064001 L 676.9500013539,706.6166655719001 C 678.9000013578,706.2833322379 704.1833347417,706.0166655707001 733.1500014663,706.0166655707001 L 785.7833349048999,705.999998904 L 786.4000015728,707.5833322405 C 786.7333349068,708.4499989088999 787.000001574,745.7999989836001 787.000001574,790.5833324065 L 787.000001574,871.999999236 L 627.2500012544999,871.7499992355 L 467.50000093499995,871.499999235 L 467.2333342678,840.4166658395 L 466.9666676006,809.333332444 L 471.73333427679995,806.0666657708 C 474.35000094869997,804.2833324339 477.40000095479996,801.6166657619 478.500000957,800.1499990923 L 480.50000096099996,797.4999990870001 L 480.50000096099996,789.999999072 L 480.50000096099996,782.499999057 L 477.5833342885,778.6833323827 C 475.9833342853,776.5833323785 472.9333342792,773.9833323733001 470.83333427499997,772.9166657045 L 467.00000093399996,770.9499990339 L 467.25000093449995,581.7333319888 L 467.50000093499995,392.49999827700003 L 645.00000129,391.89999827580004 C 767.0500015341,391.49999827500005 824.5333349824,390.9666649406 829.000001658,390.1999982724001 C 879.5666684258,381.6333315886001 924.8666685164,343.79999817960004 944.9500018898999,293.3833314121 C 949.7166685660999,281.41666472149996 954.4666685755999,263.54999801910003 955.5333352444,253.5166646657001 L 956.2333352457999,246.99999798600004 L 669.3666680054,247.1166646529001 C 502.0833343375,247.19999798640015 379.833334093,247.63333132060006 376.1000007522,248.1666646550001 M 457.73333424879996,724.5999989412 C 457.98333424929996,745.8666656504001 457.9000009158,765.1833323557 457.5500009151,767.5333323604 L 456.9000009138,771.7999990356 L 454.6000009092,772.3833323701001 C 453.33333424,772.6999990374001 450.4666675676,774.9499990419001 448.2333342298,777.3666657134 L 444.16666755499995,781.7666657222001 L 443.500000887,787.1999990664001 L 442.8166675523,792.6166657439001 L 444.4666675556,796.5666657518 C 446.4333342262,801.2833324279 450.2333342338,805.4333324362001 454.00000090799995,806.999999106 L 456.76666758019996,808.1499991083001 L 457.36666758139995,811.8166657823001 C 457.7000009153999,813.8499991197 457.98333424929996,830.4333324862 457.98333424929996,848.6999991894 L 458.000000916,881.8833325891001 L 514.0500010280999,881.8166659223 C 544.8666677563999,881.7833325889001 570.2500011404999,881.9166659225 570.4500011409,882.1333325896001 C 570.6666678079999,882.33333259 556.8000011135999,896.7833326189 539.6666677459999,914.2499993205 L 508.500001017,946.0166660507 L 456.71666758009997,945.999999384 L 404.9333341432,945.999999384 L 404.3166674753,944.2499993805 C 403.0500008061,940.6166660399 398.7500007975,935.9166660305 394.9500007899,933.9666660266 L 391.000000782,931.9666660226001 L 391.000000782,841.2333325078 L 391.000000782,750.5166656597 L 423.70000084739996,717.7999989276001 C 441.7000008834,699.7999988916001 456.60000091319995,685.2666655292 456.833334247,685.4999988630001 C 457.06666758079996,685.7333321968001 457.4666675816,703.3333322320001 457.73333424879996,724.5999989412 M 381.0333340954,845.0999991822 C 381.0500007621,890.9666659406 381.0500007621,929.2833326839 381.0333340954,930.2166660191001 C 381.0166674287,931.1666660210001 379.666667426,932.6333326906001 378.0333340894,933.4833326923 C 373.8666674144,935.6333326966001 371.0833340755,938.7666660361999 368.7500007375,943.9166660465 L 366.7666674002,948.333332722 L 367.333334068,953.1999993984 C 368.0333340694,959.0499994101 370.7833340749,963.1999994184 376.3500007527,966.7666660922 L 380.50000076099997,969.4166660975 L 386.1333341056,969.3666660974 L 391.7833341169,969.3166660973 L 396.38333412609995,966.6166660919 C 399.28333413189995,964.9166660885 401.73333413679995,962.4833327503 402.96666747259997,960.0833327455 C 404.03333414139996,957.9666660746 405.50000081099995,956.0333327374 406.2000008124,955.7833327369001 C 406.9166674805,955.5333327364001 427.3666675214,955.2166660691 451.6500009033,955.0999994022 L 495.8000009916,954.8666660684 L 496.5166676597,956.0166660707 C 496.95000099389995,956.7333327388001 485.2166676371,969.1999994304 465.8666675984,988.5833328025001 L 434.50000086899996,1019.9833328653 L 373.2500007465,1019.999999532 L 312.000000624,1019.999999532 L 312.000000624,968.5999994292 L 312.000000624,917.1833326597 L 316.60000063319995,914.499999321 L 321.20000064239997,911.7999993156 L 323.7166673141,906.3166659713 L 326.23333398579996,900.8166659603 L 325.56666731779995,896.666665952 C 324.5666673158,890.4666659396 320.5500006410999,884.3166659272999 315.95000063189997,881.9833325893001 L 312.000000624,879.9666659186 L 312.000000624,854.7166658681 L 312.000000624,829.4833324843 L 346.15000069229995,795.2333324158001 C 364.93333406319994,776.3833323781 380.46666742759993,761.1333323476 380.666667428,761.3333323480001 C 380.85000076169996,761.5166656817 381.0333340954,799.2166657571 381.0333340954,845.0999991822"/></g></symbol>
+<symbol id="gt-icon-flat" viewBox="0 0 1024 1024"><rect width="1024" height="1024" rx="229" fill="url(#neb)"/><g transform="scale(0.816587)"><path fill="#fff" fill-rule="evenodd" d="M 376.1000007522,248.1666646550001 C 368.7333340708,249.21666465710007 352.6500007053,254.98333133530014 347.2166673611,258.53333134240006 C 323.6166673139,273.89999803980004 312.0666672908,289.5833314045001 304.1500006083,316.99999812600004 L 302.55000060509997,322.49999813700003 L 302.03333393739996,601.2499986945 L 301.500000603,879.9833325853001 L 298.0333339294,881.8499992557 C 296.1166672589,882.8666659244 293.2166672531,885.3666659294 291.5666672498,887.3999992668 L 288.58333391049996,891.0666659408 L 288.18333390969997,897.4833326203 L 287.76666724219996,903.8999992998 L 290.11666724689996,907.6999993074 C 292.80000058559995,912.0833326495 295.35000059069995,914.4166659875 299.2500005985,916.0666659908 L 302.000000604,917.2499993265001 L 302.000000604,972.0333327694 C 302.000000604,1002.1833328297 302.2666672712,1027.5499995471 302.60000060519997,1028.4166662155 L 303.2166672731,1029.999999552 L 627.1000012541999,1029.999999552 L 951.0000019019999,1029.999999552 L 951.0000019019999,781.999999056 L 951.0000019019999,533.99999856 L 812.0666682908,533.99999856 L 673.1333346796,533.99999856 L 672.4500013449,531.7499985555 C 670.7833346749,526.2333318778001 661.833334657,520.0666651988 655.4000013108,520.0166651987 C 641.0166679487,519.9166651985 631.7833345969,534.6499985613 638.0666679428,547.6499985873 C 640.4166679475,552.4833319303001 644.3666679554,555.3166652693001 651.1833346356999,557.0333319394 L 655.8666679784,558.1999986084 L 660.8833346550999,556.5333319384 C 665.333334664,555.0666652688 671.9666680106,549.499998591 672.0166680107,547.2166652531 C 672.0166680107,546.8166652523 672.4166680115,545.8999985838 672.8833346791,545.1666652490001 L 673.7333346808,543.8166652463001 L 806.8666682804,543.2999985786 L 940.0166685467,542.7666652442 L 941.3166685493,543.8499985797 L 942.6333352186,544.9333319152 L 909.0500018181,578.4666653156 L 875.4666684176,611.999998716 L 774.4833348822999,611.9666653826 L 673.500001347,611.9499987159 L 671.7166680101,608.0999987082 C 666.2666679992,596.2333320178 648.2166679631,594.6333320146 639.8166679463,605.2333320358 L 636.5666679397999,609.333332044 L 636.1833346057,615.5833320565 L 635.7833346049,621.833332069 L 638.0666679428,625.8999987438 C 642.4000012847999,633.5999987591999 652.4000013048,637.666665434 660.4666679876,635.0166654287 C 665.1333346636,633.4666654256 670.3833346741,628.9166654165 672.000001344,624.999998742 L 673.2500013465,621.9999987360001 L 761.8666681904,621.7833320689 C 848.33333503,621.5666654018 863.0166683927,621.6833320687 863.9500017278999,622.6166654039 C 864.2000017283999,622.8666654044 847.7833350289,639.7166654381 827.4666683216,660.0333321454 L 790.5166682477,696.9999988860001 L 732.2833347979,696.9999988860001 L 674.0333346814,696.9999988860001 L 672.0833346774999,693.2499988785 C 667.0500013340999,683.5833321925 653.5333346404,680.2999988526001 644.1833346216999,686.4999988650001 C 633.0833345995,693.8499988797 633.3166679333,710.9999989140001 644.6000012892,717.6166655939 L 649.0166679647,720.1999989324 L 655.1333346435999,720.1999989324 L 661.2500013225,720.1999989324 L 665.3833346641,717.3166655933001 C 667.6500013353,715.7333322568 670.3833346741,712.7999989176001 671.4500013429,710.8166655803001 L 673.4166680134999,707.1999989064001 L 676.9500013539,706.6166655719001 C 678.9000013578,706.2833322379 704.1833347417,706.0166655707001 733.1500014663,706.0166655707001 L 785.7833349048999,705.999998904 L 786.4000015728,707.5833322405 C 786.7333349068,708.4499989088999 787.000001574,745.7999989836001 787.000001574,790.5833324065 L 787.000001574,871.999999236 L 627.2500012544999,871.7499992355 L 467.50000093499995,871.499999235 L 467.2333342678,840.4166658395 L 466.9666676006,809.333332444 L 471.73333427679995,806.0666657708 C 474.35000094869997,804.2833324339 477.40000095479996,801.6166657619 478.500000957,800.1499990923 L 480.50000096099996,797.4999990870001 L 480.50000096099996,789.999999072 L 480.50000096099996,782.499999057 L 477.5833342885,778.6833323827 C 475.9833342853,776.5833323785 472.9333342792,773.9833323733001 470.83333427499997,772.9166657045 L 467.00000093399996,770.9499990339 L 467.25000093449995,581.7333319888 L 467.50000093499995,392.49999827700003 L 645.00000129,391.89999827580004 C 767.0500015341,391.49999827500005 824.5333349824,390.9666649406 829.000001658,390.1999982724001 C 879.5666684258,381.6333315886001 924.8666685164,343.79999817960004 944.9500018898999,293.3833314121 C 949.7166685660999,281.41666472149996 954.4666685755999,263.54999801910003 955.5333352444,253.5166646657001 L 956.2333352457999,246.99999798600004 L 669.3666680054,247.1166646529001 C 502.0833343375,247.19999798640015 379.833334093,247.63333132060006 376.1000007522,248.1666646550001 M 457.73333424879996,724.5999989412 C 457.98333424929996,745.8666656504001 457.9000009158,765.1833323557 457.5500009151,767.5333323604 L 456.9000009138,771.7999990356 L 454.6000009092,772.3833323701001 C 453.33333424,772.6999990374001 450.4666675676,774.9499990419001 448.2333342298,777.3666657134 L 444.16666755499995,781.7666657222001 L 443.500000887,787.1999990664001 L 442.8166675523,792.6166657439001 L 444.4666675556,796.5666657518 C 446.4333342262,801.2833324279 450.2333342338,805.4333324362001 454.00000090799995,806.999999106 L 456.76666758019996,808.1499991083001 L 457.36666758139995,811.8166657823001 C 457.7000009153999,813.8499991197 457.98333424929996,830.4333324862 457.98333424929996,848.6999991894 L 458.000000916,881.8833325891001 L 514.0500010280999,881.8166659223 C 544.8666677563999,881.7833325889001 570.2500011404999,881.9166659225 570.4500011409,882.1333325896001 C 570.6666678079999,882.33333259 556.8000011135999,896.7833326189 539.6666677459999,914.2499993205 L 508.500001017,946.0166660507 L 456.71666758009997,945.999999384 L 404.9333341432,945.999999384 L 404.3166674753,944.2499993805 C 403.0500008061,940.6166660399 398.7500007975,935.9166660305 394.9500007899,933.9666660266 L 391.000000782,931.9666660226001 L 391.000000782,841.2333325078 L 391.000000782,750.5166656597 L 423.70000084739996,717.7999989276001 C 441.7000008834,699.7999988916001 456.60000091319995,685.2666655292 456.833334247,685.4999988630001 C 457.06666758079996,685.7333321968001 457.4666675816,703.3333322320001 457.73333424879996,724.5999989412 M 381.0333340954,845.0999991822 C 381.0500007621,890.9666659406 381.0500007621,929.2833326839 381.0333340954,930.2166660191001 C 381.0166674287,931.1666660210001 379.666667426,932.6333326906001 378.0333340894,933.4833326923 C 373.8666674144,935.6333326966001 371.0833340755,938.7666660361999 368.7500007375,943.9166660465 L 366.7666674002,948.333332722 L 367.333334068,953.1999993984 C 368.0333340694,959.0499994101 370.7833340749,963.1999994184 376.3500007527,966.7666660922 L 380.50000076099997,969.4166660975 L 386.1333341056,969.3666660974 L 391.7833341169,969.3166660973 L 396.38333412609995,966.6166660919 C 399.28333413189995,964.9166660885 401.73333413679995,962.4833327503 402.96666747259997,960.0833327455 C 404.03333414139996,957.9666660746 405.50000081099995,956.0333327374 406.2000008124,955.7833327369001 C 406.9166674805,955.5333327364001 427.3666675214,955.2166660691 451.6500009033,955.0999994022 L 495.8000009916,954.8666660684 L 496.5166676597,956.0166660707 C 496.95000099389995,956.7333327388001 485.2166676371,969.1999994304 465.8666675984,988.5833328025001 L 434.50000086899996,1019.9833328653 L 373.2500007465,1019.999999532 L 312.000000624,1019.999999532 L 312.000000624,968.5999994292 L 312.000000624,917.1833326597 L 316.60000063319995,914.499999321 L 321.20000064239997,911.7999993156 L 323.7166673141,906.3166659713 L 326.23333398579996,900.8166659603 L 325.56666731779995,896.666665952 C 324.5666673158,890.4666659396 320.5500006410999,884.3166659272999 315.95000063189997,881.9833325893001 L 312.000000624,879.9666659186 L 312.000000624,854.7166658681 L 312.000000624,829.4833324843 L 346.15000069229995,795.2333324158001 C 364.93333406319994,776.3833323781 380.46666742759993,761.1333323476 380.666667428,761.3333323480001 C 380.85000076169996,761.5166656817 381.0333340954,799.2166657571 381.0333340954,845.0999991822"/></g></symbol>
+</defs></svg>
+<div class="grain"></div>
+<div class="vlight"></div>
+
+<nav class="side">
+ <div class="brandmini"><svg height="40" viewBox="0 0 183.1 40" style="height:40px;width:auto;overflow:visible"><svg x="0" y="0" width="34.6" height="40" viewBox="84.4 20.0 831.3 960.0"><use href="#gt-mark" color="#fff"/></svg><text x="49.2" y="28.9" font-family="Satoshi,sans-serif" font-weight="800" font-size="24.8" letter-spacing="-.5" fill="#fff">GalaxaTech</text></svg></div>
+ <a class="lk" href="#hero"><span class="n">00</span>Overview</a>
+ <a class="lk" href="#logo"><span class="n">01</span>Logo</a>
+ <a class="lk" href="#color"><span class="n">02</span>Color &amp; Light</a>
+ <a class="lk" href="#type"><span class="n">03</span>Typography</a>
+ <a class="lk" href="#glass"><span class="n">04</span>Glassmorphism</a>
+ <a class="lk" href="#texture"><span class="n">05</span>Texture</a>
+ <a class="lk" href="#imagery"><span class="n">06</span>3D Imagery</a>
+ <a class="lk" href="#motion"><span class="n">07</span>Motion</a>
+ <div class="navft"><span class="mono">v2.0 · DARK</span><br>GalaxaTech © 2026</div>
+</nav>
+
+<main>
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+ <div class="grid-floor"></div>
+ <div class="orb orb-a"></div><div class="orb orb-b"></div>
+ <div class="hud hud-tl"><span class="mono">GALAXATECH / VISUAL SYSTEM</span></div>
+ <div class="hud hud-tr"><span class="mono">v2.0 — DARK CINEMATIC</span></div>
+ <div class="hud hud-bl"><span class="mono">LAT 23.8103 · LNG 90.4125 · DHAKA</span></div>
+ <div class="hud hud-br"><span class="mono">00 / 08</span></div>
+ <div class="hero-inner">
+  <div class="kik mono reveal">THE VISUAL OPERATING SYSTEM</div>
+  <h1 class="reveal d1">
+   <span class="scriptline">Built for the</span>
+   <span class="mega">DARK</span>
+   <span class="mega grad2">FRONTIER</span>
+  </h1>
+  <p class="lede reveal d2">Not a colour palette — a way of building. Pure black canvas, violet as light, glass as surface, conceptual 3D as hero, type that towers. Every screen, post and product should feel <em>cinematic, engineered and alive.</em></p>
+  <div class="herorow reveal d3">
+   <div class="heroicon"><svg viewBox="0 0 1024 1024"><use href="#gt-icon"/></svg></div>
+   <div class="herometa">
+    <div class="mrow"><span class="mono dim">CANVAS</span><b>#050509 — pure black</b></div>
+    <div class="mrow"><span class="mono dim">LIGHT</span><b>#8B2CFF · #A855F7 neon</b></div>
+    <div class="mrow"><span class="mono dim">TYPE</span><b>Satoshi · cinematic scale</b></div>
+    <div class="mrow"><span class="mono dim">SURFACE</span><b>frosted glassmorphism</b></div>
+   </div>
+  </div>
+ </div>
+ <div class="scrollcue mono">SCROLL ↓</div>
+</section>
+
+<!-- ============ 00 OVERVIEW / MANIFESTO ============ -->
+<section id="overview-anchor" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>00 — Philosophy</span><h2>Seven layers, one feeling</h2>
+  <p class="sub">This vibe isn't a single trick. It's the disciplined stacking of seven layers. Miss one and it collapses into "generic". Stack all seven and it reads premium, every time.</p></div>
+ <div class="layers">
+  <div class="layer glass"><span class="ln mono">01</span><h4>Black is the canvas</h4><p>Backgrounds are near-pure black (#050509). Never a purple fill. Darkness is what makes the light glow.</p></div>
+  <div class="layer glass"><span class="ln mono">02</span><h4>Violet is light, not paint</h4><p>Purple appears as neon rim-light, edge glow and atmosphere — emitted, never coated.</p></div>
+  <div class="layer glass"><span class="ln mono">03</span><h4>Type towers &amp; layers</h4><p>One giant display word fills 60–70% of the frame, layered front &amp; behind the subject.</p></div>
+  <div class="layer glass"><span class="ln mono">04</span><h4>3D is conceptual</h4><p>A single hyperreal object that <em>means</em> something — a maze, a staircase, a statue.</p></div>
+  <div class="layer glass"><span class="ln mono">05</span><h4>Glass is the surface</h4><p>UI lives on frosted translucent panels: blur, thin bright border, soft inner glow.</p></div>
+  <div class="layer glass"><span class="ln mono">06</span><h4>Texture adds depth</h4><p>Perspective grids, grain, starfields, blurred mesh-orbs. Never a flat empty black.</p></div>
+  <div class="layer glass"><span class="ln mono">07</span><h4>Motion breathes</h4><p>Float, glow-pulse, hover-lift, light-sweep. Subtle, slow, alive.</p></div>
+ </div>
+ <div class="vs">
+  <div class="vscard bad"><span class="tag mono">✕ OLD / GENERIC</span><p>Flat purple boxes. Centered text. Stock icons. Even grid of cards. Feels like a template.</p></div>
+  <div class="vscard good"><span class="tag mono">✓ NEW / CINEMATIC</span><p>Black depth. Glowing concept 3D. Towering type. Glass panels. Texture &amp; light. Feels like a film poster.</p></div>
+ </div>
+</section>
+
+<!-- ============ 01 LOGO ============ -->
+<section id="logo" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>01 — Logo</span><h2>The mark as a light source</h2>
+  <p class="sub">On the dark canvas the icon stops being a sticker and becomes the brightest object in the room. The gradient now reads as emitted light — exactly the language of the references.</p></div>
+ <div class="logo-grid">
+  <div class="logo-stage glass big"><svg class="ic" viewBox="0 0 1024 1024"><use href="#gt-icon"/></svg><span class="cap mono">PRIMARY · ELECTRIC GRADIENT</span></div>
+  <div class="logocol">
+   <div class="logo-stage glass"><svg class="ic sm" viewBox="0 0 1024 1024"><use href="#gt-icon-flat"/></svg><span class="cap mono">FLAT · SMALL SIZES</span></div>
+   <div class="logo-stage glass darker"><div class="lockholder"><svg height="40" viewBox="0 0 183.1 40" style="height:40px;width:auto;overflow:visible"><svg x="0" y="0" width="34.6" height="40" viewBox="84.4 20.0 831.3 960.0"><use href="#gt-mark" color="#fff"/></svg><text x="49.2" y="28.9" font-family="Satoshi,sans-serif" font-weight="800" font-size="24.8" letter-spacing="-.5" fill="#fff">GalaxaTech</text></svg></div><span class="cap mono">LOCKUP · ON BLACK</span></div>
+  </div>
+ </div>
+ <div class="usegrid">
+  <div class="usebox"><div class="glowwrap"><svg class="mk" style="color:#fff" viewBox="0 0 1 1"><use href="#gt-mark"/></svg></div><span class="mono">White · on black</span></div>
+  <div class="usebox"><div class="glowwrap gradbg"><svg class="mk" style="color:#fff" viewBox="0 0 1 1"><use href="#gt-mark"/></svg></div><span class="mono">White · on glow</span></div>
+  <div class="usebox"><div class="glowwrap"><svg class="mk" viewBox="0 0 1 1"><use href="#gt-mark-grad"/></svg></div><span class="mono">Gradient mark</span></div>
+  <div class="usebox"><div class="glowwrap light"><svg class="mk" style="color:#0A0825" viewBox="0 0 1 1"><use href="#gt-mark"/></svg></div><span class="mono">Black · on light glass</span></div>
+ </div>
+ <div class="note glass">On dark backgrounds always allow the icon a soft violet halo (a low-opacity radial behind it). It should look lit, not pasted. Minimum clear space = the height of the inner circuit dot.</div>
+</section>
+
+<!-- ============ 02 COLOR & LIGHT ============ -->
+<section id="color" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>02 — Colour &amp; Light</span><h2>A black canvas lit by violet</h2>
+  <p class="sub">The palette is unchanged in <em>value</em> — but its <em>role</em> flips. Black dominates the surface. Violet only ever appears as light: glow, rim, atmosphere. Click any chip to copy.</p></div>
+ <h3 class="subh">Canvas — the dark base</h3>
+ <div class="swrow">
+  <div class="sw" data-hex="#050509"><div class="chip" style="background:#050509"></div><b>Void Black</b><span class="mono">#050509</span><em>page background</em></div>
+  <div class="sw" data-hex="#0A0A12"><div class="chip" style="background:#0A0A12"></div><b>Carbon</b><span class="mono">#0A0A12</span><em>raised surface</em></div>
+  <div class="sw" data-hex="#11111C"><div class="chip" style="background:#11111C"></div><b>Slate</b><span class="mono">#11111C</span><em>cards / wells</em></div>
+  <div class="sw" data-hex="#1A1730"><div class="chip" style="background:#1A1730"></div><b>Deep Space</b><span class="mono">#1A1730</span><em>tinted dark</em></div>
+ </div>
+ <h3 class="subh">Light — the violet emission</h3>
+ <div class="swrow">
+  <div class="sw glowsw" data-hex="#8B2CFF"><div class="chip" style="background:#8B2CFF;box-shadow:0 0 34px #8B2CFF"></div><b>Galaxa Violet</b><span class="mono">#8B2CFF</span><em>primary light</em></div>
+  <div class="sw glowsw" data-hex="#A855F7"><div class="chip" style="background:#A855F7;box-shadow:0 0 34px #A855F7"></div><b>Plasma</b><span class="mono">#A855F7</span><em>accent / hover</em></div>
+  <div class="sw glowsw" data-hex="#C77DFF"><div class="chip" style="background:#C77DFF;box-shadow:0 0 34px #C77DFF"></div><b>Lavender Glow</b><span class="mono">#C77DFF</span><em>highlight rim</em></div>
+  <div class="sw glowsw" data-hex="#5B8DEF"><div class="chip" style="background:#5B8DEF;box-shadow:0 0 34px #5B8DEF"></div><b>Electric Blue</b><span class="mono">#5B8DEF</span><em>cool secondary</em></div>
+ </div>
+ <h3 class="subh">Text on black</h3>
+ <div class="swrow">
+  <div class="sw" data-hex="#F4F2FB"><div class="chip" style="background:#F4F2FB"></div><b>Starlight</b><span class="mono">#F4F2FB</span><em>headlines</em></div>
+  <div class="sw" data-hex="#B8B4CC"><div class="chip" style="background:#B8B4CC"></div><b>Ash</b><span class="mono">#B8B4CC</span><em>body</em></div>
+  <div class="sw" data-hex="#6E6A85"><div class="chip" style="background:#6E6A85"></div><b>Muted</b><span class="mono">#6E6A85</span><em>meta / labels</em></div>
+  <div class="sw" data-hex="#2A2740"><div class="chip" style="background:#2A2740"></div><b>Hairline</b><span class="mono">#2A2740</span><em>borders</em></div>
+ </div>
+ <div class="codeblock"><div class="codetop"><span class="mono">the one rule</span><button class="copy mono" data-copy="background:#050509; color:#F4F2FB; /* violet = glow only */ box-shadow:0 0 40px rgba(139,44,255,.45);">copy</button></div><pre class="mono">/* Black is fill. Violet is light. */
+background: #050509;
+color: #F4F2FB;
+box-shadow: 0 0 40px rgba(139,44,255,.45);   /* emit, don't paint */
+border: 1px solid rgba(139,44,255,.18);</pre></div>
+</section>
+
+<!-- ============ 03 TYPOGRAPHY ============ -->
+<section id="type" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>03 — Typography</span><h2>Type that towers</h2>
+  <p class="sub">Scale is the statement. One display word dominates; a small accent and a mono meta-label frame it. Type layers in front of and behind the subject for depth.</p></div>
+ <div class="typestage glass">
+  <span class="t-script">Understand the</span>
+  <div class="t-mega">BRANDING<span class="t-ghost">BRANDING</span></div>
+  <span class="t-sub mono">IN YOUR BUSINESS →</span>
+ </div>
+ <div class="typegrid">
+  <div class="tcard glass"><span class="role mono">DISPLAY</span><div class="samp big900">Aa</div><b>Satoshi Black 900</b><p>Hero words, 60–70% frame width. Tight tracking (−1 to −3). All-caps for impact.</p></div>
+  <div class="tcard glass"><span class="role mono">ACCENT</span><div class="samp script">Our</div><b>Clash / script italic</b><p>A small contrasting word above the mega type. Adds the "editorial" signature.</p></div>
+  <div class="tcard glass"><span class="role mono">BODY</span><div class="samp body">Ag</div><b>Satoshi 400 / 500</b><p>Captions &amp; paragraphs. Generous line-height, calm, never competes.</p></div>
+  <div class="tcard glass"><span class="role mono">META</span><div class="samp meta">01/08</div><b>JetBrains Mono</b><p>Pagination, coordinates, tags, button labels. The "engineered" chrome.</p></div>
+ </div>
+ <div class="scale-demo glass">
+  <div class="sd" style="font-size:4.2rem"><b>Display</b> <span class="mono dim">clamp 3–7rem · 900</span></div>
+  <div class="sd" style="font-size:2rem"><b>Heading</b> <span class="mono dim">2–2.6rem · 700</span></div>
+  <div class="sd" style="font-size:1.25rem"><b>Subhead</b> <span class="mono dim">1.25rem · 500</span></div>
+  <div class="sd" style="font-size:1rem"><b>Body copy</b> <span class="mono dim">1rem · 400 · 1.7 lh</span></div>
+  <div class="sd" style="font-size:.78rem"><b class="mono">META LABEL</b> <span class="mono dim">.78rem · tracking .25em</span></div>
+ </div>
+ <div class="note glass bn">বাংলা content-এ <b>Noto Sans Bengali</b> — display weight bold, একই towering scale। Latin display Satoshi, Bangla Noto — কখনো mix করবে না এক শব্দে।</div>
+</section>
+
+<!-- ============ 04 GLASSMORPHISM ============ -->
+<section id="glass" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>04 — Glassmorphism</span><h2>Frosted glass surfaces</h2>
+  <p class="sub">Every interface element floats on frosted glass: a blurred translucent fill, a single bright hairline border, and a soft inner highlight. This is the SHRUHH-login language — copy the CSS directly.</p></div>
+ <div class="glassdemo">
+  <div class="gd-card glass-strong">
+   <div class="gd-logo"><svg height="40" viewBox="0 0 183.1 40" style="height:40px;width:auto;overflow:visible"><svg x="0" y="0" width="34.6" height="40" viewBox="84.4 20.0 831.3 960.0"><use href="#gt-mark" color="#fff"/></svg><text x="49.2" y="28.9" font-family="Satoshi,sans-serif" font-weight="800" font-size="24.8" letter-spacing="-.5" fill="#fff">GalaxaTech</text></svg></div>
+   <h4>Welcome back, Talha</h4>
+   <label class="mono">EMAIL</label><div class="g-input"></div>
+   <label class="mono">PASSWORD</label><div class="g-input"></div>
+   <button class="g-btn">Login</button>
+   <span class="g-foot mono">New here? <b>Sign up</b></span>
+  </div>
+  <div class="gd-side">
+   <div class="g-pill glass">⚡ Glass pill</div>
+   <div class="g-stat glass"><span class="mono dim">UPTIME</span><b>99.9%</b></div>
+   <div class="g-stat glass"><span class="mono dim">FLOWS</span><b class="glowtext">1,284</b></div>
+  </div>
+ </div>
+ <div class="codeblock"><div class="codetop"><span class="mono">.glass — base panel</span><button class="copy mono" data-copy="background: rgba(255,255,255,0.045);&#10;backdrop-filter: blur(22px) saturate(140%);&#10;-webkit-backdrop-filter: blur(22px) saturate(140%);&#10;border: 1px solid rgba(199,125,255,0.20);&#10;border-radius: 20px;&#10;box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 30px rgba(139,44,255,0.06), 0 24px 70px rgba(0,0,0,0.55);">copy</button></div><pre class="mono">.glass {
+  background: rgba(255,255,255,0.045);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid rgba(199,125,255,0.20);
+  border-radius: 20px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),   /* top sheen   */
+    inset 0 0 30px rgba(139,44,255,0.06),    /* inner glow  */
+    0 24px 70px rgba(0,0,0,0.55);            /* lift shadow */
+}</pre></div>
+ <div class="codeblock"><div class="codetop"><span class="mono">.g-btn — glass button</span><button class="copy mono" data-copy="background: linear-gradient(180deg, rgba(168,85,247,.9), rgba(124,42,232,.85));&#10;border: 1px solid rgba(199,125,255,.5);&#10;border-radius: 14px; color:#fff; padding:14px 22px;&#10;box-shadow: 0 0 24px rgba(139,44,255,.5), inset 0 1px 0 rgba(255,255,255,.4);">copy</button></div><pre class="mono">.g-btn {
+  background: linear-gradient(180deg, rgba(168,85,247,.9), rgba(124,42,232,.85));
+  border: 1px solid rgba(199,125,255,.5);
+  border-radius: 14px; color:#fff;
+  box-shadow: 0 0 24px rgba(139,44,255,.5),
+              inset 0 1px 0 rgba(255,255,255,.4);
+}</pre></div>
+ <div class="rules3">
+  <div class="rule glass"><b>Do</b><p>Keep glass over texture or a glow — blur needs something behind it to refract.</p></div>
+  <div class="rule glass"><b>Do</b><p>One hairline border, lavender at ~20% opacity. Add a top inner-sheen line.</p></div>
+  <div class="rule glass"><b>Don't</b><p>No glass on flat black — it disappears. No heavy drop shadows or hard strokes.</p></div>
+ </div>
+</section>
+
+<!-- ============ 05 TEXTURE ============ -->
+<section id="texture" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>05 — Texture &amp; Background</span><h2>Never an empty black</h2>
+  <p class="sub">Depth comes from layered texture. These four are the official background system — every one is pure CSS, copy-paste ready. Stack them under glass and 3D.</p></div>
+ <div class="texgrid">
+  <div class="texcard"><div class="texvis tx-grid"></div><div class="texmeta"><b>Perspective Grid</b><button class="copy mono" data-copy="background-image: linear-gradient(rgba(139,44,255,.25) 1px, transparent 1px), linear-gradient(90deg, rgba(139,44,255,.25) 1px, transparent 1px); background-size: 46px 46px; transform: perspective(420px) rotateX(60deg);">copy CSS</button></div></div>
+  <div class="texcard"><div class="texvis tx-orb"></div><div class="texmeta"><b>Mesh Orbs</b><button class="copy mono" data-copy="background: radial-gradient(40% 50% at 75% 25%, rgba(139,44,255,.45), transparent 70%), radial-gradient(45% 45% at 20% 80%, rgba(91,141,239,.30), transparent 70%), #050509; filter: blur(10px);">copy CSS</button></div></div>
+  <div class="texcard"><div class="texvis tx-stars"></div><div class="texmeta"><b>Starfield</b><button class="copy mono" data-copy="background-image: radial-gradient(rgba(255,255,255,.5) 1px, transparent 1px); background-size: 32px 32px; opacity:.4;">copy CSS</button></div></div>
+  <div class="texcard"><div class="texvis tx-grain"></div><div class="texmeta"><b>Grain / Noise</b><button class="copy mono" data-copy="/* SVG feTurbulence as data-uri overlay */ background-image:url(&quot;data:image/svg+xml,...feTurbulence baseFrequency=0.9...&quot;); opacity:.06; mix-blend-mode:overlay;">copy CSS</button></div></div>
+ </div>
+ <div class="note glass">Recipe for any section: <b>(1)</b> #050509 base → <b>(2)</b> one mesh-orb glow positioned off-center → <b>(3)</b> faint grid or starfield → <b>(4)</b> grain overlay at 5–8% → <b>(5)</b> glass panels &amp; 3D on top. That five-step stack is the whole look.</div>
+</section>
+
+<!-- ============ 06 3D IMAGERY ============ -->
+<section id="imagery" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>06 — 3D Imagery</span><h2>The cinematic hero object</h2>
+  <p class="sub">Each visual centers on one hyperreal 3D object that <em>means</em> something. This is the direction sheet — subjects, lighting, materials, framing. (When you need an actual generation prompt, I'll write it from these rules.)</p></div>
+ <div class="imgrid">
+  <div class="imcard glass"><span class="mono dim">SUBJECT LIBRARY</span><ul><li>Marble / chrome statue (wisdom, authority)</li><li>Astronaut (exploration, frontier)</li><li>Glowing staircase (growth, scale)</li><li>Maze / labyrinth (the problem)</li><li>Glass crown · diamond (premium, value)</li><li>Brain · circuit (intelligence, AI)</li><li>Chess piece · hourglass (strategy, urgency)</li></ul></div>
+  <div class="imcard glass"><span class="mono dim">LIGHTING</span><ul><li>Single violet key-light, hard shadow</li><li>Neon rim-light tracing the silhouette</li><li>Reflective wet floor catching the glow</li><li>Volumetric haze / god-rays</li><li>Background falls to pure black</li></ul></div>
+  <div class="imcard glass"><span class="mono dim">MATERIAL &amp; MOOD</span><ul><li>Frosted glass, chrome, polished marble</li><li>Neon acrylic, brushed metal</li><li>Cinematic depth-of-field, shallow focus</li><li>Hyperreal render, 8k, octane feel</li><li>Dramatic, premium, quiet confidence</li></ul></div>
+ </div>
+ <div class="framewrap">
+  <div class="frameex glass"><span class="mono dim">FRAMING</span><p><b>Subject centered or 1/3.</b> Giant type behind the subject's top, smaller type in front of its base (occlusion = depth). Negative space breathes. Logo top-corner. Meta-label + page number as chrome.</p></div>
+ </div>
+ <div class="note glass">Concept &gt; decoration: pick the object for its <em>meaning</em> first. "Checkout is a maze", "growth is a staircase". The metaphor is what makes it stop the scroll.</div>
+</section>
+
+<!-- ============ 07 MOTION ============ -->
+<section id="motion" class="sec">
+ <div class="sechead"><span class="eyebrow"><i></i>07 — Motion</span><h2>Subtle, slow, alive</h2>
+  <p class="sub">Motion is breath, not spectacle. Slow floats, gentle glow-pulses, hover-lifts on glass, a light-sweep across type. Hover the cards to feel each one.</p></div>
+ <div class="motiongrid">
+  <div class="mcard glass m-float"><svg class="mmk" style="color:#fff" viewBox="0 0 1 1"><use href="#gt-mark"/></svg><b>Float</b><span class="mono dim">8s ease-in-out</span></div>
+  <div class="mcard glass m-pulse"><div class="pulsedot"></div><b>Glow pulse</b><span class="mono dim">opacity + shadow</span></div>
+  <div class="mcard glass m-lift"><div class="liftbox"></div><b>Hover lift</b><span class="mono dim">translateY + glow</span></div>
+  <div class="mcard glass"><div class="sweep"><span>SWEEP</span></div><b>Light sweep</b><span class="mono dim">on display type</span></div>
+ </div>
+ <div class="codeblock"><div class="codetop"><span class="mono">@keyframes float / glow-pulse</span><button class="copy mono" data-copy="@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}&#10;@keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(139,44,255,.35)}50%{box-shadow:0 0 46px rgba(139,44,255,.7)}}&#10;.hover-lift{transition:.4s cubic-bezier(.2,.7,.2,1)} .hover-lift:hover{transform:translateY(-8px); box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 40px rgba(139,44,255,.4)}">copy</button></div><pre class="mono">@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 20px rgba(139,44,255,.35) }
+  50%     { box-shadow: 0 0 46px rgba(139,44,255,.70) }
+}
+.hover-lift { transition: .4s cubic-bezier(.2,.7,.2,1); }
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 60px rgba(0,0,0,.6), 0 0 40px rgba(139,44,255,.4);
+}</pre></div>
+ <div class="endcard">
+  <div class="orb orb-c"></div>
+  <span class="mono dim">GALAXATECH · VISUAL SYSTEM · v2.0</span>
+  <h3>Black canvas. Violet light. Glass &amp; concept.</h3>
+  <p class="mono dim">Applications &amp; AI prompt library — next.</p>
+ </div>
+</section>
+</main>
+
+<div class="toast" id="toast">copied</div>
+<script>
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(function(){t.classList.remove('show')},1400);}
+function cp(txt){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast('copied');}).catch(function(){fb(txt);});}else{fb(txt);}}
+function fb(t){try{var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);toast('copied');}catch(e){}}
+document.querySelectorAll('.sw').forEach(function(s){s.addEventListener('click',function(){var h=s.getAttribute('data-hex');cp(h);});});
+document.querySelectorAll('.copy').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();cp(b.getAttribute('data-copy'));});});
+var links=[].slice.call(document.querySelectorAll('nav.side a.lk')),map={};links.forEach(function(l){map[l.getAttribute('href').slice(1)]=l;});
+var ids=['hero','overview-anchor','logo','color','type','glass','texture','imagery','motion'];
+var navmap={'hero':'hero','overview-anchor':'hero','logo':'logo','color':'color','type':'type','glass':'glass','texture':'texture','imagery':'imagery','motion':'motion'};
+ids.forEach(function(id){var el=document.getElementById(id);if(!el)return;new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(l){l.classList.remove('active');});var key=navmap[e.target.id];var l=map[key];if(l)l.classList.add('active');}});},{rootMargin:'-40% 0px -55% 0px'}).observe(el);});
+</script>
+</body></html>
